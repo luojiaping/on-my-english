@@ -2,6 +2,7 @@ package com.luojiaping.onmyenglish.core.domain
 
 import com.luojiaping.onmyenglish.core.common.AppResult
 import com.luojiaping.onmyenglish.core.model.AiProviderSettings
+import com.luojiaping.onmyenglish.core.model.Deck
 import com.luojiaping.onmyenglish.core.model.ExtractedWord
 import com.luojiaping.onmyenglish.core.model.Word
 import javax.inject.Inject
@@ -11,6 +12,12 @@ class ObserveWordsUseCase @Inject constructor(
     private val repository: WordRepository,
 ) {
     operator fun invoke(): Flow<List<Word>> = repository.observeWords()
+}
+
+class ObserveDecksUseCase @Inject constructor(
+    private val repository: WordRepository,
+) {
+    operator fun invoke(): Flow<List<Deck>> = repository.observeDecks()
 }
 
 class ExtractWordsFromImageUseCase @Inject constructor(

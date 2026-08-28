@@ -24,6 +24,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.navigation.compose)
     implementation(projects.core.designsystem)
     implementation(projects.feature.settings)
     implementation(projects.feature.stats)
