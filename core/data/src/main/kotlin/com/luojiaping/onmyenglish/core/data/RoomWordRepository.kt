@@ -56,14 +56,17 @@ class RoomWordRepository @Inject constructor(
                 val wordDao = database.wordDao()
                 val reviewDao = database.reviewDao()
                 val normalizedDeckName = deckName.normalized()
-                val deck = deckDao.findByNormalizedName(normalizedDeckName)
-                    ?: DeckEntity(
+                val deck = deckDao.findByNormalizedName(normalizedDeckName) ?: run {
+                    val newDeck = DeckEntity(
                         id = UUID.randomUUID().toString(),
                         name = deckName,
                         normalizedName = normalizedDeckName,
                         description = "",
                         createdAtEpochMillis = now,
-                    ).also(deckDao::upsertDeck)
+                    )
+                    deckDao.upsertDeck(newDeck)
+                    newDeck
+                }
 
                 var position = deckDao.nextPosition(deck.id)
                 var inserted = 0
