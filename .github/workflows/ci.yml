@@ -41,6 +41,7 @@ jobs:
           :app:assembleDebug
           :app:lintDebug
           :app:testDebugUnitTest
+          :core:ai:testDebugUnitTest
           :core:domain:test
 
       - name: Upload debug APK
@@ -59,5 +60,7 @@ jobs:
           path: |
             app/build/reports/lint-results-debug.html
             app/build/reports/tests/testDebugUnitTest/
+            core/ai/build/reports/tests/testDebugUnitTest/
             core/domain/build/reports/tests/test/
+            core/database/schemas/
           if-no-files-found: warn

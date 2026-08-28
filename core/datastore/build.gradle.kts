@@ -7,4 +7,6 @@ plugins {
 dependencies {
     implementation(projects.core.common)
     implementation(projects.core.model)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.kotlinx.coroutines.core)
 }

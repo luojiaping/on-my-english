@@ -10,4 +10,6 @@ dependencies {
     implementation(projects.core.datastore)
     implementation(projects.core.domain)
     implementation(projects.core.model)
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.room.ktx)
 }
