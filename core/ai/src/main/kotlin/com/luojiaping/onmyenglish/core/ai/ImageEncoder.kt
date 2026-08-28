@@ -16,7 +16,7 @@ import kotlin.math.roundToInt
 
 @Singleton
 class ImageEncoder @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) {
     fun encode(uriString: String): AppResult<String> {
         val encoded = runCatching {

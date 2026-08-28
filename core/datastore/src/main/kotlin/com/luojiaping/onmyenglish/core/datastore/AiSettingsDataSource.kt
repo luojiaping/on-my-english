@@ -18,7 +18,7 @@ private val Context.aiSettingsDataStore by preferencesDataStore(name = "ai_setti
 
 @Singleton
 class AiSettingsDataSource @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val secureKeyStore: SecureKeyStore,
 ) {
     val settings: Flow<AiProviderSettings> = context.aiSettingsDataStore.data
