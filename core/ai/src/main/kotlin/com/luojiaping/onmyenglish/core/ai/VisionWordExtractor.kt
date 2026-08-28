@@ -8,6 +8,7 @@ import com.luojiaping.onmyenglish.core.model.StructuredOutputMode
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -126,15 +127,15 @@ class VisionWordExtractor @Inject constructor(
                             putJsonObject("confidence") { put("type", "number") }
                         }
                         put("required", buildJsonArray {
-                            add("headword")
-                            add("definition")
-                            add("translation")
+                            add(JsonPrimitive("headword"))
+                            add(JsonPrimitive("definition"))
+                            add(JsonPrimitive("translation"))
                         })
                         put("additionalProperties", false)
                     }
                 }
             }
-            put("required", buildJsonArray { add("words") })
+            put("required", buildJsonArray { add(JsonPrimitive("words")) })
             put("additionalProperties", false)
         }
     }
