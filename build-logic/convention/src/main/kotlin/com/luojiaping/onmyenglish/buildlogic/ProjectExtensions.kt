@@ -16,24 +16,19 @@ internal val Project.libs: VersionCatalog
 internal fun Project.configureAndroid(commonExtension: CommonExtension) {
     commonExtension.apply {
         compileSdk = 37
-        defaultConfig {
+        defaultConfig.apply {
             minSdk = 29
-            testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
-        compileOptions {
+        compileOptions.apply {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
         }
-        packaging {
-            resources {
-                excludes.add("/META-INF/{AL2.0,LGPL2.1}")
-            }
-        }
+        packaging.resources.excludes.add("/META-INF/{AL2.0,LGPL2.1}")
     }
 
     extensions.configure<KotlinAndroidProjectExtension> {
         compilerOptions {
-            jvmTarget = JvmTarget.JVM_11
+            jvmTarget.set(JvmTarget.JVM_11)
         }
     }
 }

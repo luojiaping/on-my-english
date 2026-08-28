@@ -14,7 +14,10 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
         extensions.configure<ApplicationExtension> {
             configureAndroid(this)
-            defaultConfig.targetSdk = 37
+            defaultConfig.apply {
+                targetSdk = 37
+                testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+            }
             testOptions.animationsDisabled = true
         }
 

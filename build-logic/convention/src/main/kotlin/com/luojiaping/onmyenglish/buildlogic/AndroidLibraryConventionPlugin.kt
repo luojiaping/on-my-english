@@ -14,6 +14,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
         extensions.configure<LibraryExtension> {
             configureAndroid(this)
             namespace = defaultNamespace()
+            defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
 
         dependencies {

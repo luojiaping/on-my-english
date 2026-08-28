@@ -19,7 +19,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
             targetCompatibility = JavaVersion.VERSION_11
         }
         extensions.configure<KotlinJvmProjectExtension> {
-            compilerOptions.jvmTarget = JvmTarget.JVM_11
+            compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
         }
         dependencies {
             "testImplementation"(libs.findLibrary("junit4").get())
