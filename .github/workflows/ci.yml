@@ -36,7 +36,12 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build, lint, and test
-        run: ./gradlew --no-daemon :app:assembleDebug :app:lintDebug :app:testDebugUnitTest
+        run: >-
+          ./gradlew --no-daemon
+          :app:assembleDebug
+          :app:lintDebug
+          :app:testDebugUnitTest
+          :core:domain:test
 
       - name: Upload debug APK
         if: success()
@@ -54,4 +59,5 @@ jobs:
           path: |
             app/build/reports/lint-results-debug.html
             app/build/reports/tests/testDebugUnitTest/
+            core/domain/build/reports/tests/test/
           if-no-files-found: warn
