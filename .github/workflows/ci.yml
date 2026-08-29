@@ -80,10 +80,11 @@ jobs:
           fi
           APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
           "$APKSIGNER" verify --verbose --min-sdk-version 29 "$RELEASE_APK" | tee "$RUNNER_TEMP/apk-signature.txt"
-          rg -q 'Verified using v3 scheme.*true' "$RUNNER_TEMP/apk-signature.txt"
+          grep -q 'Verified using v3 scheme.*true' "$RUNNER_TEMP/apk-signature.txt"
 
       - name: Upload release APK
         if: success()
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: on-my-english-release
@@ -92,6 +93,7 @@ jobs:
 
       - name: Upload reports
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: android-reports
