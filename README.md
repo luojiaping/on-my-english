@@ -17,6 +17,7 @@
 - SM-2 复习调度器及单元测试；接口已为后续 FSRS 实现预留
 - DataStore 设置持久化；API Key 使用 Android Keystore AES-GCM 加密
 - GitHub Actions 自动构建、Lint、单元测试和 APK artifact
+- Release 开启 R8/资源压缩，并在 CI 强制校验 APK Signature Scheme v3
 
 ## 技术基线
 
@@ -30,6 +31,8 @@
 | Hilt / Room / Ktor | 2.60.1 / 2.8.4 / 3.5.2 |
 
 需要支持 AGP 9.3 的稳定版 Android Studio、JDK 17 或更高版本，以及 Android SDK Platform 37。
+
+本地正式签名密钥位于 ignored 的 `keystore/on-my-english-release.p12`，对应配置模板为 `keystore.properties.example`。私钥和密码不在 Git 中。没有本地配置时，Gradle 会使用 debug key 以便开发者仍可构建；CI 使用每次运行临时生成的 release key，仅用于构建验证。
 
 ## 运行
 

@@ -12,7 +12,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         apply(plugin = "onmyenglish.hilt")
 
         dependencies {
-            "implementation"(libs.findLibrary("androidx-compose-material-icons-extended").get())
+            "implementation"(libs.findLibrary("androidx-compose-material-icons-core").get())
             "implementation"(libs.findLibrary("androidx-hilt-navigation-compose").get())
             "implementation"(libs.findLibrary("androidx-lifecycle-runtime-compose").get())
             "implementation"(libs.findLibrary("androidx-lifecycle-viewmodel-compose").get())

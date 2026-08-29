@@ -3,7 +3,7 @@ package com.luojiaping.onmyenglish.feature.study
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +16,7 @@ fun StudyScreen(modifier: Modifier = Modifier) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             EmptyState(
                 title = "暂无待复习单词",
-                icon = Icons.Outlined.School,
+                icon = Icons.Outlined.PlayArrow,
             )
         }
     }

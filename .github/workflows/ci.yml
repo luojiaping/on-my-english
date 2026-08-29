@@ -44,12 +44,50 @@ jobs:
           :core:ai:testDebugUnitTest
           :core:domain:test
 
-      - name: Upload debug APK
+      - name: Create ephemeral release signer
+        run: |
+          CI_KEYSTORE="$RUNNER_TEMP/on-my-english-ci-release.p12"
+          CI_SIGNING_PASSWORD="$(openssl rand -hex 32)"
+          keytool -genkeypair \
+            -alias on-my-english-ci \
+            -keyalg RSA \
+            -keysize 4096 \
+            -sigalg SHA256withRSA \
+            -validity 10000 \
+            -dname "CN=On My English CI, O=luojiaping" \
+            -keystore "$CI_KEYSTORE" \
+            -storetype PKCS12 \
+            -storepass "$CI_SIGNING_PASSWORD" \
+            -keypass "$CI_SIGNING_PASSWORD" \
+            -noprompt
+          {
+            printf 'storeFile=%s\n' "$CI_KEYSTORE"
+            printf 'storePassword=%s\n' "$CI_SIGNING_PASSWORD"
+            printf 'keyAlias=on-my-english-ci\n'
+            printf 'keyPassword=%s\n' "$CI_SIGNING_PASSWORD"
+            printf 'storeType=PKCS12\n'
+          } > keystore.properties
+
+      - name: Build release and check size/signature
+        run: |
+          ./gradlew --no-daemon :app:assembleRelease
+          RELEASE_APK="app/build/outputs/apk/release/app-release.apk"
+          APK_SIZE=$(stat -c%s "$RELEASE_APK")
+          echo "Release APK size: $APK_SIZE bytes"
+          if [ "$APK_SIZE" -gt 30000000 ]; then
+            echo "Release APK exceeds 30 MiB budget"
+            exit 1
+          fi
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)
+          "$APKSIGNER" verify --verbose --min-sdk-version 29 "$RELEASE_APK" | tee "$RUNNER_TEMP/apk-signature.txt"
+          rg -q 'Verified using v3 scheme.*true' "$RUNNER_TEMP/apk-signature.txt"
+
+      - name: Upload release APK
         if: success()
         uses: actions/upload-artifact@v7
         with:
-          name: on-my-english-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: on-my-english-release
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
 
       - name: Upload reports

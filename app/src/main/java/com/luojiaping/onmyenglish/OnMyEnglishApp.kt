@@ -2,10 +2,9 @@ package com.luojiaping.onmyenglish
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.outlined.BarChart
-import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material.icons.outlined.School
+import androidx.compose.material.icons.outlined.List
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -31,9 +30,9 @@ private enum class MainDestination(
     val label: String,
     val icon: ImageVector,
 ) {
-    STUDY("study", "学习", Icons.Outlined.School),
-    WORDBOOK("wordbook", "词库", Icons.AutoMirrored.Outlined.MenuBook),
-    STATS("stats", "统计", Icons.Outlined.BarChart),
+    STUDY("study", "学习", Icons.Outlined.PlayArrow),
+    WORDBOOK("wordbook", "词库", Icons.Outlined.List),
+    STATS("stats", "统计", Icons.Outlined.Star),
     SETTINGS("settings", "设置", Icons.Outlined.Settings),
 }
 

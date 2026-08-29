@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,7 +36,7 @@ fun StatsScreen(modifier: Modifier = Modifier) {
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
             EmptyState(
                 title = "暂无学习记录",
-                icon = Icons.Outlined.BarChart,
+                icon = Icons.Outlined.Star,
                 modifier = Modifier
                     .fillMaxSize()
                     .weight(1f),

@@ -20,11 +20,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.MenuBook
-import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material.icons.outlined.List
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -133,11 +132,11 @@ private fun WordbookScreen(
                 horizontalArrangement = Arrangement.spacedBy(OmeSpacing.small),
             ) {
                 FilledTonalButton(onClick = onTakePhoto, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Outlined.CameraAlt, contentDescription = null)
+                    Icon(Icons.Outlined.Create, contentDescription = null)
                     Text("拍照导入", modifier = Modifier.padding(start = OmeSpacing.small))
                 }
                 OutlinedButton(onClick = onPickImage, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Outlined.PhotoLibrary, contentDescription = null)
+                    Icon(Icons.Outlined.Add, contentDescription = null)
                     Text("相册导入", modifier = Modifier.padding(start = OmeSpacing.small))
                 }
             }
@@ -162,7 +161,7 @@ private fun WordbookScreen(
 
             if (state.words.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    EmptyState(title = "词库为空", icon = Icons.AutoMirrored.Outlined.MenuBook)
+                    EmptyState(title = "词库为空", icon = Icons.Outlined.List)
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {

@@ -11,8 +11,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NetworkCheck
-import androidx.compose.material.icons.outlined.Save
+import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.Done
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -174,7 +174,7 @@ private fun SettingsScreen(
                     if (state.isTesting) {
                         CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
                     } else {
-                        Icon(Icons.Outlined.NetworkCheck, contentDescription = null)
+                        Icon(Icons.Outlined.Refresh, contentDescription = null)
                     }
                     Text("测试连接", modifier = Modifier.padding(start = OmeSpacing.small))
                 }
@@ -190,7 +190,7 @@ private fun SettingsScreen(
                             color = MaterialTheme.colorScheme.onPrimary,
                         )
                     } else {
-                        Icon(Icons.Outlined.Save, contentDescription = null)
+                        Icon(Icons.Outlined.Done, contentDescription = null)
                     }
                     Text("保存", modifier = Modifier.padding(start = OmeSpacing.small))
                 }
