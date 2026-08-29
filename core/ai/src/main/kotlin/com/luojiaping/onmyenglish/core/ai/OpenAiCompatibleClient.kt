@@ -84,7 +84,7 @@ class OpenAiCompatibleClient @Inject constructor(
                 }
                 val channel = response.bodyAsChannel()
                 while (!channel.isClosedForRead) {
-                    val line = channel.readLineStrict()
+                    val line = channel.readLineStrict() ?: break
                     if (!line.startsWith(SSE_PREFIX)) continue
                     val data = line.removePrefix(SSE_PREFIX).trim()
                     if (data == SSE_DONE) break
