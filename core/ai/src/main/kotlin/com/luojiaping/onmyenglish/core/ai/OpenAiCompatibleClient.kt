@@ -15,7 +15,7 @@ import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
-import io.ktor.utils.io.readUTF8Line
+import io.ktor.utils.io.readLineStrict
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
@@ -84,7 +84,7 @@ class OpenAiCompatibleClient @Inject constructor(
                 }
                 val channel = response.bodyAsChannel()
                 while (!channel.isClosedForRead) {
-                    val line = channel.readLine() ?: break
+                    val line = channel.readLineStrict()
                     if (!line.startsWith(SSE_PREFIX)) continue
                     val data = line.removePrefix(SSE_PREFIX).trim()
                     if (data == SSE_DONE) break
