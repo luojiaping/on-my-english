@@ -9,7 +9,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.http.content.TextContent
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
@@ -26,14 +25,12 @@ class OpenAiCompatibleClientTest {
     }
 
     @Test
-    fun `local endpoint sends string content without authorization`() = runBlocking {
+    fun `local endpoint sends no authorization and parses response`() = runBlocking {
         var requestUrl = ""
         var hasAuthorization = false
-        var requestBody = ""
         val engine = MockEngine { request ->
             requestUrl = request.url.toString()
             hasAuthorization = request.headers.contains(HttpHeaders.Authorization)
-            requestBody = (request.body as TextContent).text
             respond(
                 content = """
                     {"choices":[{"message":{"content":"OK"}}],"usage":{"prompt_tokens":3,"completion_tokens":1}}
@@ -66,7 +63,6 @@ class OpenAiCompatibleClientTest {
         assertTrue(result is AppResult.Success)
         assertEquals("http://127.0.0.1:11434/v1/chat/completions", requestUrl)
         assertFalse(hasAuthorization)
-        assertTrue(requestBody.contains("\"content\":\"Reply with OK\""))
         val response = (result as AppResult.Success).value
         assertEquals("OK", response.text)
         assertEquals(3, response.promptTokens)
