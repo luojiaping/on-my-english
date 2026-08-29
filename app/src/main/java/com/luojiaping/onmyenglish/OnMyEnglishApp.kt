@@ -2,6 +2,7 @@ package com.luojiaping.onmyenglish
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.School
@@ -31,7 +32,7 @@ private enum class MainDestination(
     val icon: ImageVector,
 ) {
     STUDY("study", "学习", Icons.Outlined.School),
-    WORDBOOK("wordbook", "词库", Icons.Outlined.MenuBook),
+    WORDBOOK("wordbook", "词库", Icons.AutoMirrored.Outlined.MenuBook),
     STATS("stats", "统计", Icons.Outlined.BarChart),
     SETTINGS("settings", "设置", Icons.Outlined.Settings),
 }

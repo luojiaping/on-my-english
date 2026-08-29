@@ -6,8 +6,8 @@ import com.luojiaping.onmyenglish.core.model.AiProviderSettings
 import com.luojiaping.onmyenglish.core.model.StructuredOutputMode
 import com.luojiaping.onmyenglish.core.network.NetworkJson
 import io.ktor.client.HttpClient
-import io.ktor.client.request.header
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.preparePost
 import io.ktor.client.request.setBody
@@ -84,7 +84,7 @@ class OpenAiCompatibleClient @Inject constructor(
                 }
                 val channel = response.bodyAsChannel()
                 while (!channel.isClosedForRead) {
-                    val line = channel.readUTF8Line() ?: break
+                    val line = channel.readLine() ?: break
                     if (!line.startsWith(SSE_PREFIX)) continue
                     val data = line.removePrefix(SSE_PREFIX).trim()
                     if (data == SSE_DONE) break

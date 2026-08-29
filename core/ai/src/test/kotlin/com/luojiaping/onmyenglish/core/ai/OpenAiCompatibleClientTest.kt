@@ -27,11 +27,13 @@ class OpenAiCompatibleClientTest {
 
     @Test
     fun `local endpoint sends string content without authorization`() = runBlocking {
+        var requestUrl = ""
+        var hasAuthorization = false
+        var requestBody = ""
         val engine = MockEngine { request ->
-            assertEquals("http://127.0.0.1:11434/v1/chat/completions", request.url.toString())
-            assertFalse(request.headers.contains(HttpHeaders.Authorization))
-            val body = (request.body as TextContent).text
-            assertTrue(body.contains("\"content\":\"Reply with OK\""))
+            requestUrl = request.url.toString()
+            hasAuthorization = request.headers.contains(HttpHeaders.Authorization)
+            requestBody = (request.body as TextContent).text
             respond(
                 content = """
                     {"choices":[{"message":{"content":"OK"}}],"usage":{"prompt_tokens":3,"completion_tokens":1}}
@@ -62,6 +64,9 @@ class OpenAiCompatibleClientTest {
         )
 
         assertTrue(result is AppResult.Success)
+        assertEquals("http://127.0.0.1:11434/v1/chat/completions", requestUrl)
+        assertFalse(hasAuthorization)
+        assertTrue(requestBody.contains("\"content\":\"Reply with OK\""))
         val response = (result as AppResult.Success).value
         assertEquals("OK", response.text)
         assertEquals(3, response.promptTokens)
