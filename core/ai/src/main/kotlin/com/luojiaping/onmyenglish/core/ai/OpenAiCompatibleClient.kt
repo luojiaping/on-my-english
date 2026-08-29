@@ -14,6 +14,8 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsChannel
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.utils.io.readLineStrict
 import javax.inject.Inject
@@ -42,6 +44,7 @@ class OpenAiCompatibleClient @Inject constructor(
         return runCatching {
             val response = httpClient.post(endpoint(settings)) {
                 addAuthorization(settings)
+                contentType(ContentType.Application.Json)
                 setBody(request.toOpenAiRequest(stream = false))
             }
             val rawBody = response.bodyAsText()
@@ -76,6 +79,7 @@ class OpenAiCompatibleClient @Inject constructor(
         runCatching {
             httpClient.preparePost(endpoint(settings)) {
                 addAuthorization(settings)
+                contentType(ContentType.Application.Json)
                 setBody(request.toOpenAiRequest(stream = true))
             }.execute { response ->
                 if (!response.status.isSuccess()) {
