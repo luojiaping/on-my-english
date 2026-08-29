@@ -7,6 +7,7 @@ import com.luojiaping.onmyenglish.core.model.StructuredOutputMode
 import com.luojiaping.onmyenglish.core.network.NetworkJson
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.post
 import io.ktor.client.request.preparePost
 import io.ktor.client.request.setBody
@@ -20,8 +21,9 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -35,36 +37,45 @@ class OpenAiCompatibleClient @Inject constructor(
     override suspend fun complete(
         settings: AiProviderSettings,
         request: LlmRequest,
-    ): AppResult<LlmResponse> = runCatching {
-        val response = httpClient.post(endpoint(settings)) {
-            header(HttpHeaders.Authorization, "Bearer ${settings.apiKey}")
-            setBody(request.toOpenAiRequest(stream = false))
+    ): AppResult<LlmResponse> {
+        insecureCredentialError(settings)?.let { return AppResult.Failure(it) }
+        return runCatching {
+            val response = httpClient.post(endpoint(settings)) {
+                addAuthorization(settings)
+                setBody(request.toOpenAiRequest(stream = false))
+            }
+            val rawBody = response.bodyAsText()
+            if (!response.status.isSuccess()) {
+                return mapHttpError(response.status.value, rawBody)
+            }
+            val payload = json.decodeFromString<OpenAiChatResponse>(rawBody)
+            val text = payload.choices.firstOrNull()?.message?.content
+                ?: return AppResult.Failure(
+                    AppError.Parsing("AI response did not contain message content"),
+                )
+            AppResult.Success(
+                LlmResponse(
+                    text = text,
+                    promptTokens = payload.usage?.promptTokens,
+                    completionTokens = payload.usage?.completionTokens,
+                ),
+            )
+        }.getOrElse { error ->
+            AppResult.Failure(AppError.Network(error.message ?: "AI request failed", error))
         }
-        val rawBody = response.bodyAsText()
-        if (!response.status.isSuccess()) {
-            return mapHttpError(response.status.value, rawBody)
-        }
-        val payload = json.decodeFromString<OpenAiChatResponse>(rawBody)
-        val text = payload.choices.firstOrNull()?.message?.content
-            ?: return AppResult.Failure(AppError.Parsing("AI response did not contain message content"))
-        AppResult.Success(
-            LlmResponse(
-                text = text,
-                promptTokens = payload.usage?.promptTokens,
-                completionTokens = payload.usage?.completionTokens,
-            ),
-        )
-    }.getOrElse { error ->
-        AppResult.Failure(AppError.Network(error.message ?: "AI request failed", error))
     }
 
     override fun stream(
         settings: AiProviderSettings,
         request: LlmRequest,
     ): Flow<AppResult<String>> = flow {
+        insecureCredentialError(settings)?.let {
+            emit(AppResult.Failure(it))
+            return@flow
+        }
         runCatching {
             httpClient.preparePost(endpoint(settings)) {
-                header(HttpHeaders.Authorization, "Bearer ${settings.apiKey}")
+                addAuthorization(settings)
                 setBody(request.toOpenAiRequest(stream = true))
             }.execute { response ->
                 if (!response.status.isSuccess()) {
@@ -102,25 +113,38 @@ class OpenAiCompatibleClient @Inject constructor(
             responseFormat = responseFormat(),
         )
 
-    private fun List<LlmContent>.toJson(): JsonArray = buildJsonArray {
-        forEach { part ->
-            when (part) {
-                is LlmContent.Text -> add(
-                    buildJsonObject {
-                        put("type", "text")
-                        put("text", part.text)
-                    },
-                )
-                is LlmContent.ImageData -> add(
-                    buildJsonObject {
-                        put("type", "image_url")
-                        putJsonObject("image_url") {
-                            put("url", part.dataUrl)
-                            put("detail", part.detail)
-                        }
-                    },
-                )
+    private fun List<LlmContent>.toJson(): JsonElement {
+        if (size == 1 && first() is LlmContent.Text) {
+            return JsonPrimitive((first() as LlmContent.Text).text)
+        }
+        return buildJsonArray {
+            forEach { part ->
+                when (part) {
+                    is LlmContent.Text -> add(
+                        buildJsonObject {
+                            put("type", "text")
+                            put("text", part.text)
+                        },
+                    )
+                    is LlmContent.ImageData -> add(
+                        buildJsonObject {
+                            put("type", "image_url")
+                            putJsonObject("image_url") {
+                                put("url", part.dataUrl)
+                                put("detail", part.detail)
+                            }
+                        },
+                    )
+                }
             }
+        }
+    }
+
+    private fun HttpRequestBuilder.addAuthorization(
+        settings: AiProviderSettings,
+    ) {
+        if (settings.apiKey.isNotBlank()) {
+            header(HttpHeaders.Authorization, "Bearer ${settings.apiKey}")
         }
     }
 
@@ -156,6 +180,13 @@ class OpenAiCompatibleClient @Inject constructor(
 
     private fun endpoint(settings: AiProviderSettings): String =
         "${settings.baseUrl.trimEnd('/')}/chat/completions"
+
+    private fun insecureCredentialError(settings: AiProviderSettings): AppError.Validation? =
+        if (settings.baseUrl.startsWith("http://") && settings.apiKey.isNotBlank()) {
+            AppError.Validation("Refusing to send an API key over HTTP")
+        } else {
+            null
+        }
 
     private companion object {
         const val SSE_DONE = "[DONE]"

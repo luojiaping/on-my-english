@@ -51,7 +51,7 @@ class VisionWordExtractor @Inject constructor(
 
     suspend fun testConnection(settings: AiProviderSettings): AppResult<Unit> {
         if (!settings.isConfigured) {
-            return AppResult.Failure(AppError.Authentication("API key and model are required"))
+            return AppResult.Failure(AppError.Validation("Base URL and model are required"))
         }
         val request = LlmRequest(
             model = settings.chatModel,

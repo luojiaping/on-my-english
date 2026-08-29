@@ -94,7 +94,7 @@ private fun SettingsScreen(
                 value = state.apiKey,
                 onValueChange = onApiKeyChange,
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("API Key") },
+                label = { Text("API Key（本地模型可留空）") },
                 singleLine = true,
                 enabled = !state.isLoading,
                 visualTransformation = if (showApiKey) {
@@ -107,6 +107,13 @@ private fun SettingsScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Checkbox(checked = showApiKey, onCheckedChange = { showApiKey = it })
                 Text("显示 API Key", style = MaterialTheme.typography.bodyMedium)
+            }
+            if (state.baseUrl.startsWith("http://")) {
+                Text(
+                    text = "HTTP 仅允许无密钥的本地模型服务",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
             }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)

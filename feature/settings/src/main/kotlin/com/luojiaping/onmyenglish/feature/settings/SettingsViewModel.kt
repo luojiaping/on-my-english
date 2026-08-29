@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luojiaping.onmyenglish.core.common.AppResult
 import com.luojiaping.onmyenglish.core.domain.AiSettingsRepository
-import com.luojiaping.onmyenglish.core.domain.AiVocabularyRepository
 import com.luojiaping.onmyenglish.core.domain.SaveAiSettingsUseCase
+import com.luojiaping.onmyenglish.core.domain.TestAiConnectionUseCase
 import com.luojiaping.onmyenglish.core.model.AiProviderSettings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -32,8 +32,8 @@ data class SettingsUiState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: AiSettingsRepository,
-    private val aiVocabularyRepository: AiVocabularyRepository,
     private val saveSettings: SaveAiSettingsUseCase,
+    private val testAiConnection: TestAiConnectionUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -80,7 +80,7 @@ class SettingsViewModel @Inject constructor(
         val settings = _uiState.value.toSettings()
         viewModelScope.launch {
             _uiState.update { it.copy(isTesting = true, statusMessage = null) }
-            when (val result = aiVocabularyRepository.testConnection(settings)) {
+            when (val result = testAiConnection(settings)) {
                 is AppResult.Success -> _uiState.update {
                     it.copy(isTesting = false, statusMessage = "连接成功", isError = false)
                 }

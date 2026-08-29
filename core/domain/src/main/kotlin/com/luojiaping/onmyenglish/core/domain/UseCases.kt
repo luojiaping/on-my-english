@@ -1,5 +1,6 @@
 package com.luojiaping.onmyenglish.core.domain
 
+import com.luojiaping.onmyenglish.core.common.AppError
 import com.luojiaping.onmyenglish.core.common.AppResult
 import com.luojiaping.onmyenglish.core.model.AiProviderSettings
 import com.luojiaping.onmyenglish.core.model.Deck
@@ -36,7 +37,7 @@ class ImportWordsUseCase @Inject constructor(
     ): AppResult<Int> {
         if (deckName.isBlank()) {
             return AppResult.Failure(
-                com.luojiaping.onmyenglish.core.common.AppError.Validation("Deck name is required"),
+                AppError.Validation("Deck name is required"),
             )
         }
         val normalized = candidates
@@ -50,20 +51,34 @@ class SaveAiSettingsUseCase @Inject constructor(
     private val repository: AiSettingsRepository,
 ) {
     suspend operator fun invoke(settings: AiProviderSettings): AppResult<Unit> {
-        if (!settings.baseUrl.startsWith("https://") && !settings.baseUrl.startsWith("http://")) {
-            return AppResult.Failure(
-                com.luojiaping.onmyenglish.core.common.AppError.Validation(
-                    "Base URL must start with http:// or https://",
-                ),
-            )
-        }
-        if (settings.temperature !in 0.0..2.0) {
-            return AppResult.Failure(
-                com.luojiaping.onmyenglish.core.common.AppError.Validation(
-                    "Temperature must be between 0 and 2",
-                ),
-            )
-        }
+        settings.validationError()?.let { return AppResult.Failure(it) }
         return repository.save(settings.copy(baseUrl = settings.baseUrl.trimEnd('/')))
     }
+}
+
+class TestAiConnectionUseCase @Inject constructor(
+    private val repository: AiVocabularyRepository,
+) {
+    suspend operator fun invoke(settings: AiProviderSettings): AppResult<Unit> {
+        settings.validationError()?.let { return AppResult.Failure(it) }
+        return repository.testConnection(settings.copy(baseUrl = settings.baseUrl.trimEnd('/')))
+    }
+}
+
+private fun AiProviderSettings.validationError(): AppError.Validation? = when {
+    !baseUrl.startsWith("https://") && !baseUrl.startsWith("http://") ->
+        AppError.Validation(
+            "Base URL must start with http:// or https://",
+        )
+    chatModel.isBlank() || visionModel.isBlank() ->
+        AppError.Validation("Model names are required")
+    temperature !in 0.0..2.0 ->
+        AppError.Validation(
+            "Temperature must be between 0 and 2",
+        )
+    baseUrl.startsWith("http://") && apiKey.isNotBlank() ->
+        AppError.Validation(
+            "HTTP endpoints can only be used without an API key",
+        )
+    else -> null
 }

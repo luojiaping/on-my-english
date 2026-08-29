@@ -11,7 +11,7 @@ data class AiProviderSettings(
     val temperature: Double = 0.2,
 ) {
     val isConfigured: Boolean
-        get() = baseUrl.isNotBlank() && apiKey.isNotBlank() && visionModel.isNotBlank()
+        get() = baseUrl.isNotBlank() && visionModel.isNotBlank()
 
     override fun toString(): String =
         "AiProviderSettings(baseUrl=$baseUrl, apiKey=<redacted>, chatModel=$chatModel, " +
