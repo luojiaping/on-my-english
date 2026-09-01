@@ -6,4 +6,5 @@ plugins {
 dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.model)
+    implementation(libs.androidx.compose.material.icons.core)
 }
