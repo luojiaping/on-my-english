@@ -50,6 +50,14 @@ enum class WordSource {
     AI_VISION,
     AI_GENERATED,
     IMPORTED,
+    BUILT_IN,
+}
+
+@Serializable
+enum class DeckCategory {
+    BUILT_IN,
+    AI_VISION,
+    CUSTOM,
 }
 
 @Serializable
@@ -59,4 +67,8 @@ data class Deck(
     val description: String = "",
     val wordCount: Int = 0,
     val createdAtEpochMillis: Long,
+    val category: DeckCategory = DeckCategory.CUSTOM,
+    val badge: String = "",
+    val coverUri: String? = null,
+    val learnedCount: Int = 0,
 )

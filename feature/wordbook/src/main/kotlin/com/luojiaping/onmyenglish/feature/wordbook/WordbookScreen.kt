@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,13 +24,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.List
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -58,11 +58,13 @@ import androidx.core.content.FileProvider
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.luojiaping.onmyenglish.core.designsystem.DeckAccent
+import com.luojiaping.onmyenglish.core.designsystem.DeckCapsuleCard
 import com.luojiaping.onmyenglish.core.designsystem.OmeSpacing
+import com.luojiaping.onmyenglish.core.model.Deck
+import com.luojiaping.onmyenglish.core.model.DeckCategory
 import com.luojiaping.onmyenglish.core.model.ExtractedWord
-import com.luojiaping.onmyenglish.core.model.Word
 import com.luojiaping.onmyenglish.core.ui.AppPage
-import com.luojiaping.onmyenglish.core.ui.EmptyState
 import java.io.File
 
 @Composable
@@ -71,6 +73,7 @@ fun WordbookRoute(
     viewModel: WordbookViewModel = hiltViewModel(),
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val detail by viewModel.detailState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var pendingCameraUri by rememberSaveable { mutableStateOf<String?>(null) }
 
@@ -84,29 +87,42 @@ fun WordbookRoute(
         pendingCameraUri = null
     }
 
+    val launchCamera = {
+        runCatching {
+            createCameraUri(context).also { uri ->
+                pendingCameraUri = uri.toString()
+                cameraLauncher.launch(uri)
+            }
+        }.onFailure {
+            pendingCameraUri = null
+            viewModel.reportError(it.message ?: "无法启动相机")
+        }
+    }
+    val launchGallery = {
+        galleryLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+        )
+    }
+
+    if (detail.deck != null) {
+        DeckDetailScreen(
+            state = detail,
+            onBack = { viewModel.openDeck(null) },
+            onSearch = viewModel::updateSearch,
+        )
+        return
+    }
+
     WordbookScreen(
         state = state,
-        onPickImage = {
-            galleryLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-            )
-        },
-        onTakePhoto = {
-            runCatching {
-                createCameraUri(context).also { uri ->
-                    pendingCameraUri = uri.toString()
-                    cameraLauncher.launch(uri)
-                }
-            }.onFailure {
-                pendingCameraUri = null
-                viewModel.reportError(it.message ?: "无法启动相机")
-            }
-        },
+        onOpenDeck = { viewModel.openDeck(it) },
+        onTakePhoto = launchCamera,
+        onPickImage = launchGallery,
         onToggleCandidate = viewModel::toggleCandidate,
         onUpdateCandidate = viewModel::updateCandidate,
         onDeckNameChange = viewModel::updateDeckName,
-        onImport = viewModel::importSelected,
-        onDismissImport = viewModel::dismissImport,
+        onImport = viewModel.importSelected,
+        onDismissImport = viewModel.dismissImport,
         modifier = modifier,
     )
 }
@@ -114,6 +130,7 @@ fun WordbookRoute(
 @Composable
 private fun WordbookScreen(
     state: WordbookUiState,
+    onOpenDeck: (String) -> Unit,
     onPickImage: () -> Unit,
     onTakePhoto: () -> Unit,
     onToggleCandidate: (Int) -> Unit,
@@ -123,51 +140,99 @@ private fun WordbookScreen(
     onDismissImport: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    AppPage(title = "词库", modifier = modifier) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = OmeSpacing.page, vertical = OmeSpacing.medium),
-                horizontalArrangement = Arrangement.spacedBy(OmeSpacing.small),
-            ) {
-                FilledTonalButton(onClick = onTakePhoto, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Outlined.Create, contentDescription = null)
-                    Text("拍照导入", modifier = Modifier.padding(start = OmeSpacing.small))
-                }
-                OutlinedButton(onClick = onPickImage, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Outlined.Add, contentDescription = null)
-                    Text("相册导入", modifier = Modifier.padding(start = OmeSpacing.small))
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = OmeSpacing.page, vertical = OmeSpacing.small),
-                horizontalArrangement = Arrangement.spacedBy(OmeSpacing.large),
-            ) {
-                CountMetric(label = "词条", count = state.words.size)
-                CountMetric(label = "词书", count = state.decks.size)
-            }
-            state.statusMessage?.let {
-                Text(
-                    text = it,
-                    modifier = Modifier.padding(horizontal = OmeSpacing.page, vertical = OmeSpacing.small),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium,
+    AppPage(
+        title = "词库",
+        modifier = modifier,
+        actions = {
+            IconButton(onClick = onTakePhoto) {
+                Icon(
+                    Icons.Outlined.Create,
+                    contentDescription = "拍照识词",
+                    tint = MaterialTheme.colorScheme.onSurface,
                 )
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-            if (state.words.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    EmptyState(title = "词库为空", icon = Icons.Outlined.List)
+        },
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                horizontal = OmeSpacing.page,
+                vertical = OmeSpacing.medium,
+            ),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            if (state.builtInDecks.isNotEmpty()) {
+                item(key = "header-builtin") {
+                    SectionHeader(title = "内置词库", chip = "ECDICT")
                 }
-            } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.words, key = Word::id) { word ->
-                        WordRow(word)
-                    }
+                items(state.builtInDecks, key = Deck::id) { deck ->
+                    DeckCapsuleCard(
+                        title = deck.name,
+                        subtitle = "已掌握 ${deck.learnedCount}",
+                        badge = deck.badge.ifBlank { deck.name.take(1) },
+                        accent = accentFor(deck),
+                        wordCount = deck.wordCount,
+                        learnedCount = deck.learnedCount,
+                        onClick = { onOpenDeck(deck.id) },
+                        coverUri = deck.coverUri,
+                        trailingChip = "内置",
+                    )
+                }
+            }
+
+            item(key = "header-custom") {
+                SectionHeader(title = "我的词库", chip = "AI 识图")
+            }
+            if (state.customDecks.isEmpty()) {
+                item(key = "empty-hint") {
+                    Text(
+                        text = "还没有自定义词库，拍一张单词书的照片试试",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                    )
+                }
+            }
+            items(state.customDecks, key = Deck::id) { deck ->
+                DeckCapsuleCard(
+                    title = deck.name,
+                    subtitle = "已掌握 ${deck.learnedCount}",
+                    badge = deck.badge.ifBlank { "词" },
+                    accent = accentFor(deck),
+                    wordCount = deck.wordCount,
+                    learnedCount = deck.learnedCount,
+                    onClick = { onOpenDeck(deck.id) },
+                    coverUri = deck.coverUri,
+                    coverImage = deck.coverUri?.let { uri ->
+                        {
+                            AsyncImage(
+                                model = uri,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .clip(RoundedCornerShape(percent = 50)),
+                                contentScale = ContentScale.Crop,
+                            )
+                        }
+                    },
+                    trailingChip = "AI 识图",
+                )
+            }
+
+            item(key = "cta") {
+                DashedNewDeckCard(
+                    onTakePhoto = onTakePhoto,
+                    onPickImage = onPickImage,
+                )
+            }
+
+            state.statusMessage?.let { message ->
+                item(key = "status") {
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
                 }
             }
         }
@@ -186,7 +251,73 @@ private fun WordbookScreen(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+private fun SectionHeader(title: String, chip: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp, bottom = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Text(
+            text = chip,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+private fun accentFor(deck: Deck): DeckAccent = when (deck.badge) {
+    "四" -> DeckAccent.PRIMARY
+    "六" -> DeckAccent.SECONDARY
+    "研" -> DeckAccent.TERTIARY
+    else -> DeckAccent.NEUTRAL
+}
+
+@Composable
+private fun DashedNewDeckCard(
+    onTakePhoto: () -> Unit,
+    onPickImage: () -> Unit,
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(percent = 50)),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
+        border = BorderStroke(
+            width = 1.5.dp,
+            color = MaterialTheme.colorScheme.outlineVariant,
+        ),
+        shape = RoundedCornerShape(percent = 50),
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(OmeSpacing.small),
+        ) {
+            Icon(
+                Icons.Outlined.Add,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+                text = "拍照 / 相册 识图导入",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f),
+            )
+            TextButton(onClick = onTakePhoto) { Text("拍照") }
+            TextButton(onClick = onPickImage) { Text("相册") }
+        }
+    }
+}
+
+@Composable
 private fun ImportSheet(
     state: WordbookUiState,
     onToggleCandidate: (Int) -> Unit,
@@ -257,7 +388,11 @@ private fun ImportSheet(
                 }
             }
             state.errorMessage?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
             }
             if (state.candidates.isNotEmpty()) {
                 Button(
@@ -274,7 +409,9 @@ private fun ImportSheet(
                     }
                     Text(
                         text = if (state.isImporting) "正在写入" else "导入词库",
-                        modifier = Modifier.padding(start = if (state.isImporting) OmeSpacing.small else 0.dp),
+                        modifier = Modifier.padding(
+                            start = if (state.isImporting) OmeSpacing.small else 0.dp,
+                        ),
                     )
                 }
             }
@@ -365,56 +502,6 @@ private fun CandidateEditor(
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("取消") } },
     )
-}
-
-@Composable
-private fun WordRow(word: Word) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = OmeSpacing.page, vertical = OmeSpacing.medium),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Row(verticalAlignment = Alignment.Bottom) {
-            Text(word.headword, style = MaterialTheme.typography.titleMedium)
-            if (word.phonetic.isNotBlank()) {
-                Text(
-                    text = word.phonetic,
-                    modifier = Modifier.padding(start = OmeSpacing.small),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-        val sense = word.senses.firstOrNull()
-        sense?.let {
-            Text(
-                text = it.translation.ifBlank { it.definition },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-}
-
-@Composable
-private fun CountMetric(label: String, count: Int) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-        )
-        Text(
-            text = label,
-            modifier = Modifier.padding(start = OmeSpacing.small),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
 }
 
 private fun createCameraUri(context: Context): Uri {

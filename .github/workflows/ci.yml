@@ -42,6 +42,7 @@ jobs:
           :app:lintDebug
           :app:testDebugUnitTest
           :core:ai:testDebugUnitTest
+          :core:data:testDebugUnitTest
           :core:domain:test
 
       - name: Create ephemeral release signer
@@ -101,6 +102,7 @@ jobs:
             app/build/reports/lint-results-debug.html
             app/build/reports/tests/testDebugUnitTest/
             core/ai/build/reports/tests/testDebugUnitTest/
+            core/data/build/reports/tests/testDebugUnitTest/
             core/domain/build/reports/tests/test/
             core/database/schemas/
           if-no-files-found: warn

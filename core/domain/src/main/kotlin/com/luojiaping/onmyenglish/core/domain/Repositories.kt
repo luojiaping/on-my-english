@@ -7,10 +7,21 @@ import com.luojiaping.onmyenglish.core.model.ExtractedWord
 import com.luojiaping.onmyenglish.core.model.Word
 import kotlinx.coroutines.flow.Flow
 
+data class DeckWord(
+    val wordId: String,
+    val headword: String,
+    val phonetic: String,
+    val definition: String,
+    val translation: String,
+    val learned: Boolean,
+)
+
 interface WordRepository {
     fun observeWords(): Flow<List<Word>>
 
     fun observeDecks(): Flow<List<Deck>>
+
+    fun observeDeckWords(deckId: String): Flow<List<DeckWord>>
 
     suspend fun importWords(
         deckName: String,

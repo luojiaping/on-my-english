@@ -57,17 +57,41 @@ interface DeckDao {
     @Query(
         """
         SELECT decks.id, decks.name, decks.description, decks.createdAtEpochMillis,
-               COUNT(deck_words.wordId) AS wordCount
+               decks.category, decks.badge, decks.coverUri,
+               COUNT(deck_words.wordId) AS wordCount,
+               SUM(CASE WHEN review_states.repetitions > 0 THEN 1 ELSE 0 END) AS learnedCount
         FROM decks
         LEFT JOIN deck_words ON decks.id = deck_words.deckId
+        LEFT JOIN review_states ON deck_words.wordId = review_states.wordId
         GROUP BY decks.id
         ORDER BY decks.createdAtEpochMillis DESC
         """,
     )
     fun observeDecks(): Flow<List<DeckSummary>>
 
+    @Query("SELECT * FROM decks WHERE id = :deckId LIMIT 1")
+    fun observeDeck(deckId: String): Flow<DeckEntity?>
+
+    @Query(
+        """
+        SELECT words.id AS wordId, words.headword, words.phonetic,
+               senses.id AS senseId, senses.definition, senses.translation,
+               senses.partOfSpeech, review_states.repetitions
+        FROM deck_words
+        INNER JOIN words ON deck_words.wordId = words.id
+        LEFT JOIN word_senses senses ON senses.wordId = words.id AND senses.sortOrder = 0
+        LEFT JOIN review_states ON words.id = review_states.wordId
+        WHERE deck_words.deckId = :deckId
+        ORDER BY deck_words.position
+        """,
+    )
+    fun observeDeckWords(deckId: String): Flow<List<DeckWordEntry>>
+
     @Query("SELECT * FROM decks WHERE normalizedName = :normalizedName LIMIT 1")
     suspend fun findByNormalizedName(normalizedName: String): DeckEntity?
+
+    @Query("SELECT COUNT(*) != 0 FROM decks WHERE category = 'BUILT_IN'")
+    suspend fun hasBuiltInDecks(): Boolean
 
     @Upsert
     suspend fun upsertDeck(deck: DeckEntity)

@@ -3,6 +3,7 @@ package com.luojiaping.onmyenglish.core.data
 import com.luojiaping.onmyenglish.core.database.DeckSummary
 import com.luojiaping.onmyenglish.core.database.WordWithDetails
 import com.luojiaping.onmyenglish.core.model.Deck
+import com.luojiaping.onmyenglish.core.model.DeckCategory
 import com.luojiaping.onmyenglish.core.model.PartOfSpeech
 import com.luojiaping.onmyenglish.core.model.Word
 import com.luojiaping.onmyenglish.core.model.WordExample
@@ -44,6 +45,11 @@ internal fun DeckSummary.asModel(): Deck = Deck(
     description = description,
     wordCount = wordCount,
     createdAtEpochMillis = createdAtEpochMillis,
+    category = runCatching { DeckCategory.valueOf(category) }
+        .getOrDefault(DeckCategory.CUSTOM),
+    badge = badge,
+    coverUri = coverUri,
+    learnedCount = learnedCount,
 )
 
 private fun String.toPartOfSpeech(): PartOfSpeech =

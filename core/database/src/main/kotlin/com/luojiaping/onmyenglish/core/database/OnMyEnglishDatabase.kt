@@ -18,7 +18,7 @@ import androidx.room.RoomDatabase
         WordSenseEntity::class,
         WordTagEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 abstract class OnMyEnglishDatabase : RoomDatabase() {
@@ -27,4 +27,17 @@ abstract class OnMyEnglishDatabase : RoomDatabase() {
     abstract fun importDao(): ImportDao
     abstract fun reviewDao(): ReviewDao
     abstract fun wordDao(): WordDao
+
+    companion object {
+        val MIGRATION_1_2: androidx.room.migration.Migration =
+            object : androidx.room.migration.Migration(1, 2) {
+                override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                    db.execSQL(
+                        "ALTER TABLE decks ADD COLUMN category TEXT NOT NULL DEFAULT 'CUSTOM'",
+                    )
+                    db.execSQL("ALTER TABLE decks ADD COLUMN badge TEXT NOT NULL DEFAULT ''")
+                    db.execSQL("ALTER TABLE decks ADD COLUMN coverUri TEXT")
+                }
+            }
+    }
 }

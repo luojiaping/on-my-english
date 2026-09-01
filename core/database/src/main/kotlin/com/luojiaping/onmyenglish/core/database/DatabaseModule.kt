@@ -20,7 +20,9 @@ object DatabaseModule {
         context,
         OnMyEnglishDatabase::class.java,
         "on-my-english.db",
-    ).build()
+    )
+        .addMigrations(OnMyEnglishDatabase.MIGRATION_1_2)
+        .build()
 
     @Provides
     fun provideWordDao(database: OnMyEnglishDatabase): WordDao = database.wordDao()

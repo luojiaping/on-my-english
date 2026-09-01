@@ -45,6 +45,23 @@ class RoomWordRepository @Inject constructor(
         .map { decks -> decks.map { it.asModel() } }
         .flowOn(ioDispatcher)
 
+    override fun observeDeckWords(deckId: String): Flow<List<DeckWord>> =
+        database.deckDao()
+            .observeDeckWords(deckId)
+            .map { entries ->
+                entries.map { entry ->
+                    DeckWord(
+                        wordId = entry.wordId,
+                        headword = entry.headword,
+                        phonetic = entry.phonetic,
+                        definition = entry.definition,
+                        translation = entry.translation,
+                        learned = (entry.repetitions ?: 0) > 0,
+                    )
+                }
+            }
+            .flowOn(ioDispatcher)
+
     override suspend fun importWords(
         deckName: String,
         candidates: List<ExtractedWord>,
@@ -63,6 +80,9 @@ class RoomWordRepository @Inject constructor(
                         normalizedName = normalizedDeckName,
                         description = "",
                         createdAtEpochMillis = now,
+                        category = "AI_VISION",
+                        badge = "图",
+                        coverUri = null,
                     )
                     deckDao.upsertDeck(newDeck)
                     newDeck

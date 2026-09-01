@@ -88,6 +88,9 @@ data class DeckEntity(
     val normalizedName: String,
     val description: String,
     val createdAtEpochMillis: Long,
+    val category: String = "CUSTOM",
+    val badge: String = "",
+    val coverUri: String? = null,
 )
 
 @Entity(

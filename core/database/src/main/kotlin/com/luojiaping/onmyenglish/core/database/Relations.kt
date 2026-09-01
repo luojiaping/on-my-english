@@ -33,4 +33,19 @@ data class DeckSummary(
     val description: String,
     val createdAtEpochMillis: Long,
     val wordCount: Int,
+    val category: String,
+    val badge: String,
+    val coverUri: String?,
+    val learnedCount: Int,
+)
+
+data class DeckWordEntry(
+    val wordId: String,
+    val headword: String,
+    val phonetic: String,
+    val senseId: String,
+    val definition: String,
+    val translation: String,
+    val partOfSpeech: String,
+    val repetitions: Int?,
 )

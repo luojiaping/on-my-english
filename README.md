@@ -7,6 +7,8 @@
 ## 当前能力
 
 - 四栏应用壳：学习、词库、统计、设置
+- 内置词库：四级 / 六级 / 考研（数据源 ECDICT，MIT 协议，首启自动导入）
+- 胶囊卡片词书画廊与词书详情页（词表搜索、掌握进度、封面位预留）
 - OpenAI 兼容供应商配置：Base URL、API Key、对话模型、视觉模型、温度
 - API 连通性测试
 - 相册选择或系统相机拍照
@@ -107,3 +109,15 @@ Room schema 保存在 `core/database/schemas/`。修改 Entity 时必须：
 2. 提供显式 Migration 或经过评估的 AutoMigration。
 3. 提交新 schema JSON。
 4. 增加迁移测试后再合并。
+
+当前 version 2（decks 表新增 category / badge / coverUri）。
+
+## 内置词库数据
+
+`app/src/main/assets/decks/{cet4,cet6,kaoyan}.json.gz` 由 `scripts/ecdict_export.py`
+从 [ECDICT](https://github.com/skywind3000/ECDICT)（MIT）导出，共约 14,000 词，
+按当代语料库词频排序。重新生成：
+
+```bash
+python3 scripts/ecdict_export.py /path/to/ecdict.csv
+```

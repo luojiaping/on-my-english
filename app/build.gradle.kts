@@ -54,6 +54,7 @@ android {
 dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.navigation.compose)
+    implementation(projects.core.data)
     implementation(projects.core.designsystem)
     implementation(projects.feature.settings)
     implementation(projects.feature.stats)

@@ -5,18 +5,24 @@ import androidx.lifecycle.viewModelScope
 import com.luojiaping.onmyenglish.core.common.AppResult
 import com.luojiaping.onmyenglish.core.domain.ExtractWordsFromImageUseCase
 import com.luojiaping.onmyenglish.core.domain.ImportWordsUseCase
+import com.luojiaping.onmyenglish.core.domain.ObserveDeckWordsUseCase
 import com.luojiaping.onmyenglish.core.domain.ObserveDecksUseCase
 import com.luojiaping.onmyenglish.core.domain.ObserveWordsUseCase
 import com.luojiaping.onmyenglish.core.model.Deck
+import com.luojiaping.onmyenglish.core.model.DeckCategory
+import com.luojiaping.onmyenglish.core.model.DeckWord
 import com.luojiaping.onmyenglish.core.model.ExtractedWord
 import com.luojiaping.onmyenglish.core.model.Word
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -32,17 +38,59 @@ data class WordbookUiState(
     val isImporting: Boolean = false,
     val errorMessage: String? = null,
     val statusMessage: String? = null,
-)
+) {
+    val builtInDecks: List<Deck> get() = decks.filter { it.category == DeckCategory.BUILT_IN }
+    val customDecks: List<Deck>
+        get() = decks.filter { it.category != DeckCategory.BUILT_IN }
+}
+
+data class DeckDetailUiState(
+    val deck: Deck? = null,
+    val words: List<DeckWord> = emptyList(),
+    val searchQuery: String = "",
+) {
+    val filtered: List<DeckWord>
+        get() = if (searchQuery.isBlank()) {
+            words
+        } else {
+            words.filter { it.headword.contains(searchQuery, ignoreCase = true) }
+        }
+}
 
 @HiltViewModel
 class WordbookViewModel @Inject constructor(
     observeWords: ObserveWordsUseCase,
     observeDecks: ObserveDecksUseCase,
+    private val observeDeckWords: ObserveDeckWordsUseCase,
     private val extractWords: ExtractWordsFromImageUseCase,
     private val importWords: ImportWordsUseCase,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(WordbookUiState())
     val uiState: StateFlow<WordbookUiState> = _uiState.asStateFlow()
+
+    private val selectedDeckId = MutableStateFlow<String?>(null)
+    private val searchQuery = MutableStateFlow("")
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    val detailState: StateFlow<DeckDetailUiState> = combine(
+        selectedDeckId,
+        searchQuery,
+        observeDecks(),
+        selectedDeckId.flatMapLatest { id ->
+            if (id == null) {
+                kotlinx.coroutines.flow.flowOf(emptyList())
+            } else {
+                observeDeckWords(id)
+            }
+        },
+    ) { deckId, query, decks, words ->
+        DeckDetailUiState(
+            deck = decks.firstOrNull { it.id == deckId },
+            words = words,
+            searchQuery = query,
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), DeckDetailUiState())
+
     private var extractionJob: Job? = null
 
     init {
@@ -52,6 +100,15 @@ class WordbookViewModel @Inject constructor(
                     _uiState.update { it.copy(words = words, decks = decks) }
                 }
         }
+    }
+
+    fun openDeck(deckId: String?) {
+        selectedDeckId.value = deckId
+        searchQuery.value = ""
+    }
+
+    fun updateSearch(query: String) {
+        searchQuery.value = query
     }
 
     fun selectImage(uri: String) {
