@@ -1,6 +1,7 @@
 plugins {
     id("onmyenglish.android.library")
     id("onmyenglish.hilt")
+    alias(libs.plugins.kotlin.serialization)
 }
 
 dependencies {
@@ -11,5 +12,6 @@ dependencies {
     implementation(projects.core.domain)
     implementation(projects.core.model)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.room.ktx)
 }

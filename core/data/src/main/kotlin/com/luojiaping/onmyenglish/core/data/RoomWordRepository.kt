@@ -14,6 +14,7 @@ import com.luojiaping.onmyenglish.core.database.WordExampleEntity
 import com.luojiaping.onmyenglish.core.database.WordFtsEntity
 import com.luojiaping.onmyenglish.core.database.WordSenseEntity
 import com.luojiaping.onmyenglish.core.database.WordTagEntity
+import com.luojiaping.onmyenglish.core.domain.DeckWord
 import com.luojiaping.onmyenglish.core.domain.WordRepository
 import com.luojiaping.onmyenglish.core.model.Deck
 import com.luojiaping.onmyenglish.core.model.ExtractedWord

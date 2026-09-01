@@ -16,6 +16,7 @@ import com.luojiaping.onmyenglish.core.model.ReviewState
 import com.luojiaping.onmyenglish.core.model.WordSource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
+import java.util.zip.GZIPInputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
@@ -35,7 +36,7 @@ class BuiltInDeckSeeder @Inject constructor(
         for (assetId in BUILT_IN_ASSETS) {
             val text = runCatching {
                 context.assets.open("decks/$assetId.json.gz").use { input ->
-                    java.util.GZIPInputStream(input).readBytes().toString(Charsets.UTF_8)
+                    GZIPInputStream(input).readBytes().toString(Charsets.UTF_8)
                 }
             }.getOrElse { continue }
 
