@@ -43,6 +43,8 @@ interface LlmClient {
         request: LlmRequest,
     ): AppResult<LlmResponse>
 
+    suspend fun listModels(settings: AiProviderSettings): AppResult<List<String>>
+
     fun stream(
         settings: AiProviderSettings,
         request: LlmRequest,

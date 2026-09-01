@@ -39,4 +39,7 @@ class DefaultAiVocabularyRepository @Inject constructor(
 
     override suspend fun testConnection(settings: AiProviderSettings): AppResult<Unit> =
         extractor.testConnection(settings)
+
+    override suspend fun listModels(settings: AiProviderSettings): AppResult<List<String>> =
+        extractor.listModels(settings)
 }

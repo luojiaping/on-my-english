@@ -39,4 +39,6 @@ interface AiVocabularyRepository {
     suspend fun extractWords(imageUri: String): AppResult<List<ExtractedWord>>
 
     suspend fun testConnection(settings: AiProviderSettings): AppResult<Unit>
+
+    suspend fun listModels(settings: AiProviderSettings): AppResult<List<String>>
 }

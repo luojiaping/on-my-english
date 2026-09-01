@@ -72,6 +72,18 @@ class TestAiConnectionUseCase @Inject constructor(
     }
 }
 
+class ListAiModelsUseCase @Inject constructor(
+    private val repository: AiVocabularyRepository,
+) {
+    suspend operator fun invoke(settings: AiProviderSettings): AppResult<List<String>> =
+        repository.listModels(
+            settings.copy(
+                baseUrl = settings.baseUrl.trim(),
+                apiKey = settings.apiKey.trim(),
+            ),
+        )
+}
+
 private fun AiProviderSettings.validationError(): AppError.Validation? = when {
     !baseUrl.startsWith("https://") && !baseUrl.startsWith("http://") ->
         AppError.Validation(

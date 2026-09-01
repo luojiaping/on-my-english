@@ -66,6 +66,9 @@ class VisionWordExtractor @Inject constructor(
         }
     }
 
+    suspend fun listModels(settings: AiProviderSettings): AppResult<List<String>> =
+        llmClient.listModels(settings)
+
     private fun request(
         settings: AiProviderSettings,
         image: String,

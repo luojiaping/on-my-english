@@ -44,6 +44,16 @@ internal data class OpenAiUsage(
 )
 
 @Serializable
+internal data class OpenAiModelsResponse(
+    val data: List<OpenAiModelSummary> = emptyList(),
+)
+
+@Serializable
+internal data class OpenAiModelSummary(
+    val id: String? = null,
+)
+
+@Serializable
 internal data class OpenAiErrorEnvelope(
     val error: OpenAiError? = null,
 )

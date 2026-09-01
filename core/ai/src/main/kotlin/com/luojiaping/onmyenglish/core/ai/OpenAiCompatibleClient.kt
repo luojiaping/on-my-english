@@ -7,6 +7,7 @@ import com.luojiaping.onmyenglish.core.model.StructuredOutputMode
 import com.luojiaping.onmyenglish.core.network.NetworkJson
 import io.ktor.client.HttpClient
 import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.preparePost
@@ -141,6 +142,25 @@ class OpenAiCompatibleClient @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    override suspend fun listModels(
+        settings: AiProviderSettings,
+    ): AppResult<List<String>> {
+        insecureCredentialError(settings)?.let { return AppResult.Failure(it) }
+        return runCatching {
+            val response = httpClient.get("${settings.baseUrl.trimEnd('/')}/models") {
+                addAuthorization(settings)
+            }
+            val rawBody = response.bodyAsText()
+            if (!response.status.isSuccess()) {
+                return mapHttpError(response.status.value, rawBody)
+            }
+            val payload = json.decodeFromString<OpenAiModelsResponse>(rawBody)
+            AppResult.Success(payload.data.mapNotNull { it.id }.filter(String::isNotBlank))
+        }.getOrElse { error ->
+            AppResult.Failure(AppError.Network(error.message ?: "Could not load models", error))
         }
     }
 
