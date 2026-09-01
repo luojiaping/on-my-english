@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luojiaping.onmyenglish.core.common.AppResult
 import com.luojiaping.onmyenglish.core.domain.DeckWord
+import com.luojiaping.onmyenglish.core.domain.DeckWord
 import com.luojiaping.onmyenglish.core.domain.ExtractWordsFromImageUseCase
 import com.luojiaping.onmyenglish.core.domain.ImportWordsUseCase
 import com.luojiaping.onmyenglish.core.domain.ObserveDeckWordsUseCase
@@ -11,7 +12,6 @@ import com.luojiaping.onmyenglish.core.domain.ObserveDecksUseCase
 import com.luojiaping.onmyenglish.core.domain.ObserveWordsUseCase
 import com.luojiaping.onmyenglish.core.model.Deck
 import com.luojiaping.onmyenglish.core.model.DeckCategory
-import com.luojiaping.onmyenglish.core.model.DeckWord
 import com.luojiaping.onmyenglish.core.model.ExtractedWord
 import com.luojiaping.onmyenglish.core.model.Word
 import dagger.hilt.android.lifecycle.HiltViewModel
