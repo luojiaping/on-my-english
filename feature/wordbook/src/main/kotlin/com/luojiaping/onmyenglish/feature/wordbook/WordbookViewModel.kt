@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luojiaping.onmyenglish.core.common.AppResult
 import com.luojiaping.onmyenglish.core.domain.DeckWord
-import com.luojiaping.onmyenglish.core.domain.DeckWord
 import com.luojiaping.onmyenglish.core.domain.ExtractWordsFromImageUseCase
 import com.luojiaping.onmyenglish.core.domain.ImportWordsUseCase
 import com.luojiaping.onmyenglish.core.domain.ObserveDeckWordsUseCase
