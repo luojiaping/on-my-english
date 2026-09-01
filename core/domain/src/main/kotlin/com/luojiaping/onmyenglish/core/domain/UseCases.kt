@@ -4,7 +4,6 @@ import com.luojiaping.onmyenglish.core.common.AppError
 import com.luojiaping.onmyenglish.core.common.AppResult
 import com.luojiaping.onmyenglish.core.model.AiProviderSettings
 import com.luojiaping.onmyenglish.core.model.Deck
-import com.luojiaping.onmyenglish.core.model.DeckWord
 import com.luojiaping.onmyenglish.core.model.ExtractedWord
 import com.luojiaping.onmyenglish.core.model.Word
 import javax.inject.Inject
