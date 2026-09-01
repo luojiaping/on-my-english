@@ -88,7 +88,7 @@ fun WordbookRoute(
         pendingCameraUri = null
     }
 
-    val launchCamera = {
+    val launchCamera: () -> Unit = {
         runCatching {
             createCameraUri(context).also { uri ->
                 pendingCameraUri = uri.toString()
@@ -99,7 +99,7 @@ fun WordbookRoute(
             viewModel.reportError(it.message ?: "无法启动相机")
         }
     }
-    val launchGallery = {
+    val launchGallery: () -> Unit = {
         galleryLauncher.launch(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
         )
@@ -122,11 +122,10 @@ fun WordbookRoute(
         onToggleCandidate = viewModel::toggleCandidate,
         onUpdateCandidate = viewModel::updateCandidate,
         onDeckNameChange = viewModel::updateDeckName,
-        onImport = viewModel.importSelected,
-        onDismissImport = viewModel.dismissImport,
+        onImport = viewModel::importSelected,
+        onDismissImport = viewModel::dismissImport,
         modifier = modifier,
-    )
-}
+    )}
 
 @Composable
 private fun WordbookScreen(
@@ -175,7 +174,6 @@ private fun WordbookScreen(
                         wordCount = deck.wordCount,
                         learnedCount = deck.learnedCount,
                         onClick = { onOpenDeck(deck.id) },
-                        coverUri = deck.coverUri,
                         trailingChip = "内置",
                     )
                 }
@@ -203,7 +201,6 @@ private fun WordbookScreen(
                     wordCount = deck.wordCount,
                     learnedCount = deck.learnedCount,
                     onClick = { onOpenDeck(deck.id) },
-                    coverUri = deck.coverUri,
                     coverImage = deck.coverUri?.let { uri ->
                         {
                             AsyncImage(
@@ -319,6 +316,7 @@ private fun DashedNewDeckCard(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun ImportSheet(
     state: WordbookUiState,
     onToggleCandidate: (Int) -> Unit,

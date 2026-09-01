@@ -99,7 +99,10 @@ fun DeckDetailScreen(
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.filtered, key = DeckWordItem::wordId) { word ->
+                    items(
+                        items = state.filtered,
+                        key = { word: DeckWordItem -> word.wordId },
+                    ) { word ->
                         DeckWordRow(word)
                     }
                 }
