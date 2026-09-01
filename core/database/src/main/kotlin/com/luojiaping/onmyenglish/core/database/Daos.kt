@@ -90,8 +90,8 @@ interface DeckDao {
     @Query("SELECT * FROM decks WHERE normalizedName = :normalizedName LIMIT 1")
     suspend fun findByNormalizedName(normalizedName: String): DeckEntity?
 
-    @Query("SELECT COUNT(*) != 0 FROM decks WHERE category = 'BUILT_IN'")
-    suspend fun hasBuiltInDecks(): Boolean
+    @Query("SELECT COUNT(*) != 0 FROM decks WHERE id = :deckId")
+    suspend fun deckExists(deckId: String): Boolean
 
     @Upsert
     suspend fun upsertDeck(deck: DeckEntity)

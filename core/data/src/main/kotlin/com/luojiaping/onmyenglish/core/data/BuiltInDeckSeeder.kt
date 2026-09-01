@@ -31,15 +31,11 @@ class BuiltInDeckSeeder @Inject constructor(
 ) {
     suspend fun seedIfNeeded() = withContext(ioDispatcher) {
         val deckDao = database.deckDao()
-        if (deckDao.hasBuiltInDecks()) return@withContext
-
         for (assetId in BUILT_IN_ASSETS) {
-            val text = runCatching {
-                context.assets.open("decks/$assetId.json.gz").use { input ->
-                    GZIPInputStream(input).readBytes().toString(Charsets.UTF_8)
-                }
-            }.getOrElse { continue }
+            val deckId = "builtin-$assetId"
+            if (deckDao.deckExists(deckId)) continue
 
+            val text = readAsset(assetId) ?: continue
             val asset = when (val parsed = parser.parse(text)) {
                 is com.luojiaping.onmyenglish.core.common.AppResult.Success -> parsed.value
                 else -> continue
@@ -47,7 +43,8 @@ class BuiltInDeckSeeder @Inject constructor(
 
             database.withTransaction {
                 val now = System.currentTimeMillis()
-                val deckId = "builtin-${asset.id}"
+                val wordDao = database.wordDao()
+                val reviewDao = database.reviewDao()
                 deckDao.upsertDeck(
                     DeckEntity(
                         id = deckId,
@@ -61,8 +58,6 @@ class BuiltInDeckSeeder @Inject constructor(
                     ),
                 )
                 var position = deckDao.nextPosition(deckId)
-                val wordDao = database.wordDao()
-                val reviewDao = database.reviewDao()
 
                 for (word in asset.words) {
                     val normalized = word.w.trim().lowercase(Locale.ROOT)
@@ -129,6 +124,25 @@ class BuiltInDeckSeeder @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun readAsset(assetId: String): String? {
+        // AGP strips the .gz suffix when packaging compressed assets, so plain
+        // .json is the canonical name; keep gzip fallback for local variants.
+        val candidates = listOf("decks/$assetId.json", "decks/$assetId.json.gz")
+        for (name in candidates) {
+            val stream = runCatching { context.assets.open(name) }.getOrNull() ?: continue
+            return runCatching {
+                stream.use { input ->
+                    if (name.endsWith(".gz")) {
+                        GZIPInputStream(input).readBytes().toString(Charsets.UTF_8)
+                    } else {
+                        input.readBytes().toString(Charsets.UTF_8)
+                    }
+                }
+            }.getOrNull()
+        }
+        return null
     }
 
     private companion object {

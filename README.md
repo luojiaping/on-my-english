@@ -114,9 +114,9 @@ Room schema 保存在 `core/database/schemas/`。修改 Entity 时必须：
 
 ## 内置词库数据
 
-`app/src/main/assets/decks/{cet4,cet6,kaoyan}.json.gz` 由 `scripts/ecdict_export.py`
+`app/src/main/assets/decks/{cet4,cet6,kaoyan}.json` 由 `scripts/ecdict_export.py`
 从 [ECDICT](https://github.com/skywind3000/ECDICT)（MIT）导出，共约 14,000 词，
-按当代语料库词频排序。重新生成：
+按当代语料库词频排序（APK 打包时自动 deflate，无需手动 gzip）。重新生成：
 
 ```bash
 python3 scripts/ecdict_export.py /path/to/ecdict.csv

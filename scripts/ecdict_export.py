@@ -2,12 +2,14 @@
 """Export built-in word decks from ECDICT (MIT, skywind3000/ECDICT).
 
 Filters ecdict.csv by exam tag and emits one compact JSON per deck,
-gzipped, ready for app/src/main/assets/decks/.
+ready for app/src/main/assets/decks/.
+
+AGP transparently decompresses .gz assets at packaging time and strips
+the extension, so plain JSON is stored instead; the APK deflates it.
 
 Usage: python3 scripts/ecdict_export.py /path/to/ecdict.csv
 """
 import csv
-import gzip
 import json
 import sys
 from pathlib import Path
@@ -68,9 +70,9 @@ def main(csv_path: str) -> None:
             unique.append(item)
         doc = {"id": key, "name": DECKS[key]["name"], "badge": DECKS[key]["badge"],
                "tag": DECKS[key]["tag"], "count": len(unique), "words": unique}
-        target = out_dir / f"{key}.json.gz"
-        with gzip.open(target, "wt", encoding="utf-8", compresslevel=9) as gz:
-            json.dump(doc, gz, ensure_ascii=False, separators=(",", ":"))
+        target = out_dir / f"{key}.json"
+        with target.open("wt", encoding="utf-8") as f:
+            json.dump(doc, f, ensure_ascii=False, separators=(",", ":"))
         manifest[key] = len(unique)
         print(f"{key}: {len(unique)} words -> {target} ({target.stat().st_size} bytes)")
 
