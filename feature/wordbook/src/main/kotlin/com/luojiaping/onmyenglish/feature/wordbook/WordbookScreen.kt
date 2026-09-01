@@ -9,6 +9,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -155,7 +156,7 @@ private fun WordbookScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            contentPadding = PaddingValues(
                 horizontal = OmeSpacing.page,
                 vertical = OmeSpacing.medium,
             ),
@@ -210,7 +211,7 @@ private fun WordbookScreen(
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(56.dp)
-                                    .clip(RoundedCornerShape(percent = 50)),
+                                    .clip(RoundedCornerShape(50)),
                                 contentScale = ContentScale.Crop,
                             )
                         }
@@ -287,13 +288,13 @@ private fun DashedNewDeckCard(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(percent = 50)),
+            .clip(RoundedCornerShape(50)),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0f),
         border = BorderStroke(
             width = 1.5.dp,
             color = MaterialTheme.colorScheme.outlineVariant,
         ),
-        shape = RoundedCornerShape(percent = 50),
+        shape = RoundedCornerShape(50),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 18.dp),

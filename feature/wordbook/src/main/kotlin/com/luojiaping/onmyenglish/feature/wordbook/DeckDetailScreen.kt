@@ -84,7 +84,7 @@ fun DeckDetailScreen(
                     Icon(Icons.Outlined.Search, contentDescription = null)
                 },
                 singleLine = true,
-                shape = RoundedCornerShape(percent = 50),
+                shape = RoundedCornerShape(50),
             )
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -162,7 +162,7 @@ private fun CoverBanner(
                 )
                 Surface(
                     color = Color.White.copy(alpha = 0.25f),
-                    shape = RoundedCornerShape(percent = 50),
+                    shape = RoundedCornerShape(50),
                 ) {
                     Box(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),

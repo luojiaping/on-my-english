@@ -6,12 +6,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
@@ -31,28 +29,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 enum class DeckAccent(val start: Color, val end: Color) {
-    PRIMARY(
-        Color(0xFF176B51),
-        Color(0xFF4FAE8A),
-    ),
-    SECONDARY(
-        Color(0xFF685D32),
-        Color(0xFFB3A05B),
-    ),
-    TERTIARY(
-        Color(0xFF8D3B4B),
-        Color(0xFFC97A87),
-    ),
-    NEUTRAL(
-        Color(0xFF45504A),
-        Color(0xFF7C8A82),
-    ),
+    PRIMARY(Color(0xFF176B51), Color(0xFF4FAE8A)),
+    SECONDARY(Color(0xFF685D32), Color(0xFFB3A05B)),
+    TERTIARY(Color(0xFF8D3B4B), Color(0xFFC97A87)),
+    NEUTRAL(Color(0xFF45504A), Color(0xFF7C8A82)),
     ;
 
     @Composable
     fun brush() = Brush.linearGradient(listOf(start, end))
 }
 
+/** Capsule-shaped deck card: 56dp cover slot + title/progress body. */
 @Composable
 fun DeckCapsuleCard(
     title: String,
@@ -63,49 +50,39 @@ fun DeckCapsuleCard(
     learnedCount: Int,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    coverUri: String? = null,
     coverImage: @Composable (() -> Unit)? = null,
     trailingChip: String? = null,
 ) {
     val progress = if (wordCount > 0) learnedCount.toFloat() / wordCount else 0f
+    val capsule = RoundedCornerShape(46.dp)
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(percent: 50))
+            .clip(capsule)
             .clickable(onClick = onClick),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
-        tonalElevation = 2.dp,
-        shape = RoundedCornerShape(percent: 50),
+        shape = capsule,
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 13.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(percent: 50)),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (coverImage != null) {
+            if (coverImage != null) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(CircleShape),
+                ) {
                     coverImage()
-                } else {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .background(brush = accent.brush(), shape = CircleShape),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(
-                            text = badge,
-                            color = Color.White,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
                 }
+            } else {
+                DeckCoverPlaceholder(
+                    badge = badge,
+                    accent = accent,
+                    modifier = Modifier.size(56.dp),
+                )
             }
 
             Column(
@@ -152,7 +129,7 @@ fun DeckCapsuleCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(4.dp)
-                                .clip(RoundedCornerShape(percent: 50)),
+                                .clip(CircleShape),
                             color = MaterialTheme.colorScheme.primary,
                             trackColor = MaterialTheme.colorScheme.surfaceVariant,
                         )
@@ -167,8 +144,6 @@ fun DeckCapsuleCard(
                     )
                 }
             }
-
-            Spacer(Modifier.width(0.dp))
         }
     }
 }
@@ -180,7 +155,7 @@ fun DeckChip(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(percent: 50))
+            .clip(RoundedCornerShape(11.dp))
             .background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center,
     ) {
@@ -201,7 +176,7 @@ fun DeckCoverPlaceholder(
     icon: ImageVector? = null,
 ) {
     Box(
-        modifier = modifier.background(brush = accent.brush(), shape = CircleShape),
+        modifier = modifier.clip(CircleShape).background(brush = accent.brush()),
         contentAlignment = Alignment.Center,
     ) {
         if (icon != null) {
